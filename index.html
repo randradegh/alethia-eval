@@ -183,6 +183,28 @@ body {
   -webkit-text-fill-color: transparent;
   letter-spacing: 3px;
 }
+.reset-exam-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: var(--text-light);
+  opacity: 0.25;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  line-height: 1;
+}
+.reset-exam-btn:hover {
+  opacity: 0.8;
+  color: #F87171;
+  background: rgba(248,113,113,0.06);
+}
 .reset-hidden {
   cursor: pointer;
   user-select: none;
@@ -547,7 +569,7 @@ body {
 
   <!-- EXAM -->
   <div id="examen" class="screen">
-    <div class="exam-header">
+    <div class="exam-header" style="position:relative;">
       <div class="top-row">
         <span class="exam-title">💜 Práctica de Matemáticas</span>
         <span class="question-counter" id="qCounter">1 / 40</span>
@@ -555,6 +577,7 @@ body {
       <div class="progress-container">
         <div class="progress-fill" id="progressFill"></div>
       </div>
+      <button class="reset-exam-btn" onclick="resetDuringExam()" title="Reiniciar examen (para pruebas)">↺</button>
     </div>
     <div class="aleth-name">✨ Aleth 💜 ✨</div>
     <div class="topic-label" id="topicLabel">Tema 1 · Las fracciones</div>
@@ -1626,6 +1649,17 @@ function showToast(msg) {
   toast.textContent = msg;
   toast.style.display = "block";
   setTimeout(() => { toast.style.display = "none"; }, 2500);
+}
+
+// ====== RESET BUTTON IN EXAM (visible pero discreto) ======
+function resetDuringExam() {
+  if (!confirm("↺ ¿Reiniciar el examen desde cero? Se perderán tus respuestas.")) return;
+  localStorage.removeItem("alethia_version");
+  showToast("✅ Examen reiniciado — todo como nuevo");
+  document.getElementById("examen").classList.remove("active");
+  document.getElementById("resultados").classList.remove("active");
+  document.getElementById("portada").classList.add("active");
+  document.querySelector(".exam-title").textContent = "💜 Práctica de Matemáticas";
 }
 </script>
 </body>
