@@ -1,0 +1,4 @@
+.netlify/
+*.pdf
+*.html
+!index.html
