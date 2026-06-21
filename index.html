@@ -1123,26 +1123,22 @@ function saveVersionInfo(info) {
 
 function pickQuestionsForVersion() {
   const info = getVersionInfo();
-  info.count += 1;
 
-  // If already on version 4+ (3 done), block
-  if (info.count > 3) {
-    return null; // signal "request new version"
+  // If already done 3 versions, block
+  if (info.count >= 3) {
+    return null;
   }
 
-  // QUESTIONS[0..39] = core (IDs 1-40), QUESTIONS[40..59] = reserve (IDs 41-60)
+  const version = info.count + 1; // 1, 2, or 3
   const coreQuestions = QUESTIONS.slice(0, 40);
   const reserveQuestions = QUESTIONS.slice(40);
   let selected;
 
-  if (info.count === 1) {
-    // Version 1: all 40 core questions
+  if (version === 1) {
     selected = [...coreQuestions];
-  } else if (info.count === 2) {
-    // Version 2: 30 core + 10 reserve (25% new)
+  } else if (version === 2) {
     selected = [...coreQuestions.slice(10), ...reserveQuestions.slice(0, 10)];
-  } else if (info.count === 3) {
-    // Version 3: 20 core + 20 reserve (50% new)
+  } else if (version === 3) {
     selected = [...coreQuestions.slice(20), ...reserveQuestions.slice(0, 20)];
   }
 
@@ -1152,11 +1148,11 @@ function pickQuestionsForVersion() {
   // Shuffle MC options within each question
   selected.forEach(q => shuffleOptions(q));
 
-  // Save used IDs
+  // Save used IDs (but DON'T increment count yet — that happens on finish)
   info.usedIds = selected.map(q => q.id);
   saveVersionInfo(info);
 
-  return selected;
+  return { version: version, questions: selected };
 }
 
 function initState(selectedQs) {
@@ -1181,9 +1177,9 @@ function initState(selectedQs) {
 
 // ====== NAV ======
 function startExam() {
-  const selected = pickQuestionsForVersion();
+  const result = pickQuestionsForVersion();
 
-  if (selected === null) {
+  if (result === null) {
     alert("💜 ¡Ya has completado las 3 versiones disponibles de este examen! Solicita a tu asesor (randrade@expgrowai.mx) una nueva versión personalizada. 🌸");
     return;
   }
@@ -1192,11 +1188,10 @@ function startExam() {
   document.getElementById("examen").classList.add("active");
 
   // Show version info
-  const info = getVersionInfo();
   document.querySelector(".exam-title").textContent =
-    "💜 Práctica v" + info.count + " de 3";
+    "💜 Práctica v" + result.version + " de 3";
 
-  initState(selected);
+  initState(result.questions);
   renderQuestion(0);
 }
 
@@ -1548,6 +1543,11 @@ function finishExam() {
     if (isCorrect) topicScores[q.topic].correct++;
   });
   
+  // Increment version count (solo cuando se finaliza el examen)
+  const info = getVersionInfo();
+  info.count += 1;
+  saveVersionInfo(info);
+
   // Show results
   showResults(correct, topicScores);
 }
