@@ -184,11 +184,24 @@ body {
   letter-spacing: 3px;
 }
 .reset-hidden {
-  cursor: default;
+  cursor: pointer;
   user-select: none;
   transition: opacity 0.3s;
+  position: relative;
 }
-.reset-hidden:hover { opacity: 0.7; }
+.reset-hidden:hover { opacity: 0.5; }
+.reset-hidden:active { opacity: 0.3; }
+.reset-hidden::after {
+  content: "···";
+  display: block;
+  font-size: 8px;
+  letter-spacing: 4px;
+  color: var(--text-light);
+  opacity: 0.3;
+  margin-top: -4px;
+  transition: opacity 0.3s;
+}
+.reset-hidden:hover::after { opacity: 0.8; }
 .reset-toast {
   position: fixed;
   bottom: 40px;
@@ -1585,6 +1598,12 @@ let tapTimer = null;
 
 function tripleTapReset() {
   tapCount++;
+  // Visual feedback on each tap
+  const el = document.getElementById("resetTrigger");
+  if (el) {
+    el.style.opacity = tapCount >= 3 ? "0.3" : "0.5";
+    setTimeout(() => { if (el) el.style.opacity = ""; }, 300);
+  }
   if (tapCount === 1) {
     tapTimer = setTimeout(() => { tapCount = 0; }, 800);
   }
@@ -1593,7 +1612,7 @@ function tripleTapReset() {
     tapCount = 0;
     // Full reset: clear localStorage, reload
     localStorage.removeItem("alethia_version");
-    showToast("✅ Examen reiniciado — todo como nuevo");
+    showToast("✅ Examen reiniciado — el contador de versiones volvió a cero");
     // If currently in exam, go back to portada
     document.getElementById("examen").classList.remove("active");
     document.getElementById("resultados").classList.remove("active");
